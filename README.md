@@ -16,4 +16,3 @@ See [the app documentation](ikev2-client/DOCS.md) for installation and setup.
 > IKEv2/IPsec and OpenVPN are different protocols. An OpenVPN-only server such
 > as `kylemanna/openvpn` will not work with this app. The popular
 > `hwdsl2/ipsec-vpn-server` image does support IKEv2.
-
