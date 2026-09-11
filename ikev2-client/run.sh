@@ -134,8 +134,17 @@ case "${AUTHENTICATION}" in
     certificate)
         validate_relative_file "p12_file" "${P12_FILE}"
         [[ -n "${CLIENT_ID}" ]] || fail "client_id is required for certificate authentication"
-        printf '%s' "${P12_PASSWORD}" > "${RUNTIME_DIR}/p12-password"
-        chmod 0600 "${RUNTIME_DIR}/p12-password"
+        declare -a P12_PASSIN_ARGS
+        if [[ -n "${P12_PASSWORD}" ]]; then
+            printf '%s' "${P12_PASSWORD}" > "${RUNTIME_DIR}/p12-password"
+            chmod 0600 "${RUNTIME_DIR}/p12-password"
+            P12_PASSIN_ARGS=( -passin "file:${RUNTIME_DIR}/p12-password" )
+        else
+            # An empty password file makes OpenSSL report "Error reading
+            # password from BIO". Use its explicit empty-password form.
+            P12_PASSIN_ARGS=( -passin 'pass:' )
+            bashio::log.info "PKCS#12 bundle has no import password"
+        fi
         bashio::log.info "Reading PKCS#12 bundle /config/${P12_FILE} ($(stat -c '%s bytes' "/config/${P12_FILE}" 2>/dev/null || printf 'size unavailable'))"
         bashio::log.info "PKCS#12 decoder: $(openssl version 2>/dev/null || printf 'OpenSSL version unavailable')"
         : > "${P12_ERROR_LOG}"
@@ -146,13 +155,13 @@ case "${AUTHENTICATION}" in
             local -a legacy_args=()
             [[ -z "${legacy_flag}" ]] || legacy_args+=("${legacy_flag}")
             openssl pkcs12 "${legacy_args[@]}" -in "/config/${P12_FILE}" \
-                -passin "file:${RUNTIME_DIR}/p12-password" -cacerts -nokeys \
+                "${P12_PASSIN_ARGS[@]}" -cacerts -nokeys \
                 -out /etc/ipsec.d/cacerts/ha-ca.pem 2>>"${P12_ERROR_LOG}" \
             && openssl pkcs12 "${legacy_args[@]}" -in "/config/${P12_FILE}" \
-                -passin "file:${RUNTIME_DIR}/p12-password" -clcerts -nokeys \
+                "${P12_PASSIN_ARGS[@]}" -clcerts -nokeys \
                 -out /etc/ipsec.d/certs/ha-client.pem 2>>"${P12_ERROR_LOG}" \
             && openssl pkcs12 "${legacy_args[@]}" -in "/config/${P12_FILE}" \
-                -passin "file:${RUNTIME_DIR}/p12-password" -nocerts -nodes \
+                "${P12_PASSIN_ARGS[@]}" -nocerts -nodes \
                 -out /etc/ipsec.d/private/ha-client.key 2>>"${P12_ERROR_LOG}"
         }
 
