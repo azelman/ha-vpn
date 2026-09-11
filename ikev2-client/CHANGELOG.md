@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.4
+
+- Fix invalid Home Assistant capability declarations that prevented the app
+  from appearing in the app store.
+- Use the supported full access mode required by strongSwan for capability
+  setup and privilege dropping.
+
 ## 1.0.3
 
 - Grant strongSwan the capabilities required to initialize its control
