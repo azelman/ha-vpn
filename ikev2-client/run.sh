@@ -250,6 +250,14 @@ ${AUTH_CONFIG}
 EOF
 chmod 0600 /etc/ipsec.conf
 
+cat > /etc/strongswan.d/ha-ikev2.conf <<'EOF'
+charon {
+  user = root
+  group = root
+}
+EOF
+chmod 0600 /etc/strongswan.d/ha-ikev2.conf
+
 bashio::log.info "Starting strongSwan IKEv2 client for ${SERVER}"
 bashio::log.info "Authentication: ${AUTHENTICATION}; remote networks: ${REMOTE_SUBNETS}"
 ipsec start --nofork &

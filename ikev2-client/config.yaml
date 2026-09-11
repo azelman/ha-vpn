@@ -1,5 +1,5 @@
 name: IKEv2 VPN Client
-version: "1.0.4"
+version: "1.0.5"
 slug: ikev2_client
 description: Connect the Home Assistant host to a remote IKEv2/IPsec VPN
 url: https://github.com/azelman/ha-vpn
@@ -14,8 +14,6 @@ apparmor: true
 host_network: true
 privileged:
   - NET_ADMIN
-protected: false
-full_access: true
 map:
   - type: addon_config
     read_only: true

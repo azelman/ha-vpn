@@ -4,9 +4,9 @@ This app runs strongSwan in the Home Assistant host network namespace. Traffic
 from Home Assistant that matches `remote_subnets` can therefore use the IPsec
 tunnel. It requires network administration access for Linux XFRM policies and
 uses host networking because a tunnel isolated inside the app would not help
-Home Assistant itself. The app uses Home Assistant's supported full access
-mode because strongSwan must initialize kernel networking and drop privileges
-inside the container.
+Home Assistant itself. strongSwan remains root inside the container because
+Home Assistant's app capability model does not expose the ownership and group
+capabilities required by strongSwan's normal privilege transition.
 
 ## Before installing: identify the server
 

@@ -1,11 +1,14 @@
 # Changelog
 
+## 1.0.5
+
+- Configure strongSwan to keep its daemon as root so it can initialize its
+  control sockets with Home Assistant's supported capability model.
+
 ## 1.0.4
 
 - Fix invalid Home Assistant capability declarations that prevented the app
   from appearing in the app store.
-- Use the supported full access mode required by strongSwan for capability
-  setup and privilege dropping.
 
 ## 1.0.3
 
