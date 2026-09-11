@@ -32,7 +32,7 @@ options:
   ike_proposals: ""
   esp_proposals: ""
   force_udp_encapsulation: false
-  reconnect_interval: 30
+  reconnect_interval: 300
   log_level: info
 schema:
   server: "match(^[A-Za-z0-9][A-Za-z0-9._:-]*$)"

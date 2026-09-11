@@ -3,6 +3,8 @@
 ## 1.0.0
 
 - Initial release.
+- Check tunnel health every five minutes by default and recover stale sessions
+  before reconnecting.
 - Migrate image builds from the retired Home Assistant builder configuration to
   a Dockerfile-based build.
 - Add CI validation for shell, YAML, app metadata, and image builds.

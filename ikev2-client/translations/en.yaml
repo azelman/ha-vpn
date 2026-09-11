@@ -43,7 +43,7 @@ configuration:
     description: Force NAT-T on UDP 4500; useful behind unusual NAT devices.
   reconnect_interval:
     name: Reconnect interval
-    description: Seconds between tunnel health checks and reconnection attempts.
+    description: Seconds between tunnel health checks and reconnection attempts; the default is 300 seconds.
   log_level:
     name: Log level
     description: strongSwan diagnostic verbosity shown in the app log.

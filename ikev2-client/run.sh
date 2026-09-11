@@ -248,11 +248,18 @@ else
     bashio::log.warning "Initial connection failed; the app will keep retrying"
 fi
 
+is_tunnel_up() {
+    local status
+    status="$(ipsec status "${CONNECTION}" 2>/dev/null || true)"
+    [[ "${status}" == *"INSTALLED"* ]]
+}
+
 while kill -0 "${DAEMON_PID}" 2>/dev/null; do
     sleep "${RECONNECT_INTERVAL}" &
     wait $! || true
-    if ! ipsec status "${CONNECTION}" 2>/dev/null | grep -q "INSTALLED"; then
+    if ! is_tunnel_up; then
         bashio::log.warning "IKEv2 tunnel is down; reconnecting..."
+        ipsec down "${CONNECTION}" >/dev/null 2>&1 || true
         ipsec up "${CONNECTION}" || true
     fi
 done

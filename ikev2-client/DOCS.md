@@ -51,7 +51,7 @@ p12_file: homeassistant.p12
 p12_password: "the import password shown by the server"
 remote_subnets: 0.0.0.0/0
 force_udp_encapsulation: false
-reconnect_interval: 30
+reconnect_interval: 300
 log_level: info
 ```
 
@@ -81,6 +81,11 @@ remote_subnets: 10.20.0.0/16,192.168.50.0/24
 
 The server must advertise/permit the same traffic selectors. A client cannot
 invent access to a remote LAN that the server does not route.
+
+The app checks the tunnel every five minutes by default and attempts to bring
+it back up when strongSwan no longer reports an installed child security
+association. Set `reconnect_interval` between 10 and 3600 seconds if a
+different check interval is needed.
 
 ## EAP-MSCHAPv2
 
