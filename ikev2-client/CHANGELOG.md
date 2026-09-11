@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1
+
+- Add safe PKCS#12 decoding diagnostics without logging passwords or certificate contents.
+
 ## 1.0.0
 
 - Initial release.

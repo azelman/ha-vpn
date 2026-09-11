@@ -4,6 +4,7 @@ set -Eeuo pipefail
 
 readonly CONNECTION="ha-ikev2"
 readonly RUNTIME_DIR="/run/ha-ikev2"
+readonly P12_ERROR_LOG="${RUNTIME_DIR}/p12-openssl-errors.log"
 DAEMON_PID=""
 
 fail() {
@@ -135,6 +136,10 @@ case "${AUTHENTICATION}" in
         [[ -n "${CLIENT_ID}" ]] || fail "client_id is required for certificate authentication"
         printf '%s' "${P12_PASSWORD}" > "${RUNTIME_DIR}/p12-password"
         chmod 0600 "${RUNTIME_DIR}/p12-password"
+        bashio::log.info "Reading PKCS#12 bundle /config/${P12_FILE} ($(stat -c '%s bytes' "/config/${P12_FILE}" 2>/dev/null || printf 'size unavailable'))"
+        bashio::log.info "PKCS#12 decoder: $(openssl version 2>/dev/null || printf 'OpenSSL version unavailable')"
+        : > "${P12_ERROR_LOG}"
+        chmod 0600 "${P12_ERROR_LOG}"
 
         extract_p12() {
             local legacy_flag="${1:-}"
@@ -142,18 +147,26 @@ case "${AUTHENTICATION}" in
             [[ -z "${legacy_flag}" ]] || legacy_args+=("${legacy_flag}")
             openssl pkcs12 "${legacy_args[@]}" -in "/config/${P12_FILE}" \
                 -passin "file:${RUNTIME_DIR}/p12-password" -cacerts -nokeys \
-                -out /etc/ipsec.d/cacerts/ha-ca.pem >/dev/null 2>&1 \
+                -out /etc/ipsec.d/cacerts/ha-ca.pem 2>>"${P12_ERROR_LOG}" \
             && openssl pkcs12 "${legacy_args[@]}" -in "/config/${P12_FILE}" \
                 -passin "file:${RUNTIME_DIR}/p12-password" -clcerts -nokeys \
-                -out /etc/ipsec.d/certs/ha-client.pem >/dev/null 2>&1 \
+                -out /etc/ipsec.d/certs/ha-client.pem 2>>"${P12_ERROR_LOG}" \
             && openssl pkcs12 "${legacy_args[@]}" -in "/config/${P12_FILE}" \
                 -passin "file:${RUNTIME_DIR}/p12-password" -nocerts -nodes \
-                -out /etc/ipsec.d/private/ha-client.key >/dev/null 2>&1
+                -out /etc/ipsec.d/private/ha-client.key 2>>"${P12_ERROR_LOG}"
         }
 
         if ! extract_p12; then
-            bashio::log.warning "Normal PKCS#12 decoding failed; retrying legacy decoding"
-            extract_p12 "-legacy" || fail "Unable to decode /config/${P12_FILE}; check the file and p12_password"
+            bashio::log.warning "Normal PKCS#12 decoding failed; retrying with OpenSSL legacy providers"
+            if ! extract_p12 "-legacy"; then
+                bashio::log.error "PKCS#12 decoding failed in normal and legacy modes"
+                if [[ -s "${P12_ERROR_LOG}" ]]; then
+                    bashio::log.error "OpenSSL diagnostics: $(tr '\n' ' ' < "${P12_ERROR_LOG}" | sed -E 's/[[:space:]]+/ /g' | cut -c1-1000)"
+                else
+                    bashio::log.error "OpenSSL returned no diagnostic output"
+                fi
+                fail "Unable to decode /config/${P12_FILE}; check the file and p12_password"
+            fi
         fi
         openssl x509 -in /etc/ipsec.d/certs/ha-client.pem -noout >/dev/null 2>&1 || \
             fail "The PKCS#12 bundle does not contain a readable client certificate"
