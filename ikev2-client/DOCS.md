@@ -56,6 +56,7 @@ client_id: homeassistant
 p12_file: homeassistant.p12
 p12_password: "the import password shown by the server"
 remote_subnets: 0.0.0.0/0
+local_subnets: 192.168.88.242/32
 force_udp_encapsulation: false
 reconnect_interval: 300
 log_level: info
@@ -65,6 +66,13 @@ log_level: info
 certificate. `client_id` must exactly match the client name used to create the
 bundle. If the server's helper did not print an import password, leave
 `p12_password` empty.
+
+To make Home Assistant reachable from another VPN client, set
+`local_subnets` to the Home Assistant address (`192.168.88.242/32`) or its
+whole LAN (`192.168.88.0/24`). The VPN server must route that subnet through
+this client and allow it in the IPsec traffic selectors. For a site-to-site
+connection, set `remote_subnets` to the remote network, such as
+`192.168.77.0/24`, instead of `0.0.0.0/0`.
 
 The server project's Linux-client instructions may require adding
 `authby=rsa-sha1` to the server's `ikev2-cp` connection and restarting IPsec.

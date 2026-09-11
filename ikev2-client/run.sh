@@ -89,6 +89,7 @@ PASSWORD="$(get_optional password)"
 PRE_SHARED_KEY="$(get_optional pre_shared_key)"
 SERVER_CA_FILE="$(get_optional server_ca_file)"
 REMOTE_SUBNETS="$(bashio::config remote_subnets)"
+LOCAL_SUBNETS="$(get_optional local_subnets)"
 IKE_PROPOSALS="$(get_optional ike_proposals)"
 ESP_PROPOSALS="$(get_optional esp_proposals)"
 FORCE_ENCAP="$(bashio::config force_udp_encapsulation)"
@@ -99,6 +100,7 @@ for pair in \
     "server ID:${SERVER_ID}" \
     "client ID:${CLIENT_ID}" \
     "username:${USERNAME}" \
+    "local subnets:${LOCAL_SUBNETS}" \
     "remote subnets:${REMOTE_SUBNETS}" \
     "IKE proposals:${IKE_PROPOSALS}" \
     "ESP proposals:${ESP_PROPOSALS}"; do
@@ -112,6 +114,9 @@ reject_control_characters "pre-shared key" "${PRE_SHARED_KEY}"
 [[ "${CLIENT_ID}" != *"#"* ]] || fail "client_id must not contain '#'"
 [[ "${USERNAME}" != *"#"* ]] || fail "username must not contain '#'"
 REMOTE_SUBNETS="$(normalize_ipv4_subnets "${REMOTE_SUBNETS}")"
+if [[ -n "${LOCAL_SUBNETS}" ]]; then
+    LOCAL_SUBNETS="$(normalize_ipv4_subnets "${LOCAL_SUBNETS}")"
+fi
 [[ "${IKE_PROPOSALS}" =~ ^[A-Za-z0-9_,+!-]*$ ]] || fail "ike_proposals contains invalid characters"
 [[ "${ESP_PROPOSALS}" =~ ^[A-Za-z0-9_,+!-]*$ ]] || fail "esp_proposals contains invalid characters"
 
@@ -221,6 +226,7 @@ esac
 chmod 0600 /etc/ipsec.secrets
 
 EXTRA_CONFIG=""
+[[ -z "${LOCAL_SUBNETS}" ]] || EXTRA_CONFIG+=$'\n'"  leftsubnet=${LOCAL_SUBNETS}"
 [[ -z "${IKE_PROPOSALS}" ]] || EXTRA_CONFIG+=$'\n'"  ike=${IKE_PROPOSALS}"
 [[ -z "${ESP_PROPOSALS}" ]] || EXTRA_CONFIG+=$'\n'"  esp=${ESP_PROPOSALS}"
 [[ "${FORCE_ENCAP}" != "true" ]] || EXTRA_CONFIG+=$'\n'"  forceencaps=yes"
@@ -263,7 +269,7 @@ EOF
 chmod 0600 /etc/strongswan.d/ha-ikev2.conf
 
 bashio::log.info "Starting strongSwan IKEv2 client for ${SERVER}"
-bashio::log.info "Authentication: ${AUTHENTICATION}; remote networks: ${REMOTE_SUBNETS}"
+bashio::log.info "Authentication: ${AUTHENTICATION}; local networks: ${LOCAL_SUBNETS:-host only}; remote networks: ${REMOTE_SUBNETS}"
 ipsec start --nofork &
 DAEMON_PID=$!
 

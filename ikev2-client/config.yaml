@@ -1,5 +1,5 @@
 name: IKEv2 VPN Client
-version: "1.0.6"
+version: "1.0.7"
 slug: ikev2_client
 description: Connect the Home Assistant host to a remote IKEv2/IPsec VPN
 url: https://github.com/azelman/ha-vpn
@@ -28,6 +28,7 @@ options:
   password: ""
   pre_shared_key: ""
   server_ca_file: ""
+  local_subnets: ""
   remote_subnets: "0.0.0.0/0"
   ike_proposals: ""
   esp_proposals: ""
@@ -45,6 +46,7 @@ schema:
   password: password?
   pre_shared_key: password?
   server_ca_file: str?
+  local_subnets: str?
   remote_subnets: str
   ike_proposals: str?
   esp_proposals: str?

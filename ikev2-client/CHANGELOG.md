@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.7
+
+- Add an optional `local_subnets` setting for reaching Home Assistant or its
+  LAN through the VPN client tunnel.
+
 ## 1.0.6
 
 - Configure strongSwan to keep its daemon as root so it can initialize its
