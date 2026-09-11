@@ -19,10 +19,10 @@ jobs:
       build_matrix: ${{ steps.matrix.outputs.matrix }}
       image_name: ${{ steps.normalize.outputs.image_name }}
       registry_prefix: ${{ steps.normalize.outputs.registry_prefix }}
-      version: ${{ steps.info.outputs.version }}
-      name: ${{ steps.info.outputs.name }}
-      description: ${{ steps.info.outputs.description }}
-      url: ${{ steps.info.outputs.url }}
+      version: ${{ steps.normalize.outputs.version }}
+      name: ${{ steps.normalize.outputs.name }}
+      description: ${{ steps.normalize.outputs.description }}
+      url: ${{ steps.normalize.outputs.url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -36,9 +36,18 @@ jobs:
         id: normalize
         env:
           IMAGE: ${{ steps.info.outputs.image }}
+          VERSION: ${{ steps.info.outputs.version }}
+          NAME: ${{ steps.info.outputs.name }}
+          DESCRIPTION: ${{ steps.info.outputs.description }}
+          URL: ${{ steps.info.outputs.url }}
         run: |
-          echo "image_name=${IMAGE##*/}" >> "$GITHUB_OUTPUT"
-          echo "registry_prefix=${IMAGE%/*}" >> "$GITHUB_OUTPUT"
+          image=$(jq -r <<< "$IMAGE")
+          echo "image_name=${image##*/}" >> "$GITHUB_OUTPUT"
+          echo "registry_prefix=${image%/*}" >> "$GITHUB_OUTPUT"
+          jq -r '"version=" + .' <<< "$VERSION" >> "$GITHUB_OUTPUT"
+          jq -r '"name=" + .' <<< "$NAME" >> "$GITHUB_OUTPUT"
+          jq -r '"description=" + .' <<< "$DESCRIPTION" >> "$GITHUB_OUTPUT"
+          jq -r '"url=" + .' <<< "$URL" >> "$GITHUB_OUTPUT"
 
       - name: Prepare build matrix
         id: matrix
