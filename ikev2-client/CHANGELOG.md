@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.8
+
+- Fix false tunnel-down detections by checking the installed CHILD_SA.
+- Resolve the VPN endpoint before strongSwan changes the system DNS servers,
+  allowing recovery when a tunnel is restarted.
+
 ## 1.0.7
 
 - Add an optional `local_subnets` setting for reaching Home Assistant or its

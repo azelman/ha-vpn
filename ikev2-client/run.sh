@@ -110,6 +110,9 @@ reject_control_characters "PKCS#12 password" "${P12_PASSWORD}"
 reject_control_characters "EAP password" "${PASSWORD}"
 reject_control_characters "pre-shared key" "${PRE_SHARED_KEY}"
 
+SERVER_ENDPOINT="$(getent ahostsv4 "${SERVER}" 2>/dev/null | awk 'NR == 1 { print $1 }')"
+[[ -n "${SERVER_ENDPOINT}" ]] || fail "Unable to resolve VPN server '${SERVER}'"
+
 [[ "${SERVER_ID}" != *"#"* ]] || fail "server_id must not contain '#'"
 [[ "${CLIENT_ID}" != *"#"* ]] || fail "client_id must not contain '#'"
 [[ "${USERNAME}" != *"#"* ]] || fail "username must not contain '#'"
@@ -243,7 +246,7 @@ conn ${CONNECTION}
   left=%defaultroute
   leftsourceip=%config4
 ${AUTH_CONFIG}
-  right=${SERVER}
+  right=${SERVER_ENDPOINT}
   rightid=${SERVER_ID}
   rightsubnet=${REMOTE_SUBNETS}
   fragmentation=yes
@@ -268,7 +271,7 @@ charon {
 EOF
 chmod 0600 /etc/strongswan.d/ha-ikev2.conf
 
-bashio::log.info "Starting strongSwan IKEv2 client for ${SERVER}"
+bashio::log.info "Starting strongSwan IKEv2 client for ${SERVER} (${SERVER_ENDPOINT})"
 bashio::log.info "Authentication: ${AUTHENTICATION}; local networks: ${LOCAL_SUBNETS:-host only}; remote networks: ${REMOTE_SUBNETS}"
 ipsec start --nofork &
 DAEMON_PID=$!
@@ -290,15 +293,17 @@ fi
 
 is_tunnel_up() {
     local status
-    status="$(ipsec status "${CONNECTION}" 2>/dev/null || true)"
-    [[ "${status}" == *"INSTALLED"* ]]
+    status="$(ipsec statusall 2>/dev/null || true)"
+    grep -Eq "^[[:space:]]*${CONNECTION}\\{[0-9]+\\}: INSTALLED" <<<"${status}"
 }
 
 while kill -0 "${DAEMON_PID}" 2>/dev/null; do
     sleep "${RECONNECT_INTERVAL}" &
     wait $! || true
     if ! is_tunnel_up; then
-        bashio::log.warning "IKEv2 tunnel is down; reconnecting..."
+        tunnel_status="$(ipsec statusall 2>/dev/null || true)"
+        tunnel_status="${tunnel_status//$'\n'/ }"
+        bashio::log.warning "IKEv2 tunnel is down; reconnecting. Status: ${tunnel_status:0:1000}"
         ipsec down "${CONNECTION}" >/dev/null 2>&1 || true
         ipsec up "${CONNECTION}" || true
     fi
