@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2
+
+- Fix decoding of PKCS#12 bundles that use an empty import password.
+
 ## 1.0.1
 
 - Add safe PKCS#12 decoding diagnostics without logging passwords or certificate contents.
