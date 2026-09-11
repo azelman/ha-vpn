@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.3
+
+- Grant strongSwan the capabilities required to initialize its control
+  sockets and drop privileges inside the Home Assistant app container.
+
 ## 1.0.2
 
 - Fix decoding of PKCS#12 bundles that use an empty import password.
