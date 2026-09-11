@@ -1,0 +1,49 @@
+configuration:
+  server:
+    name: VPN server
+    description: Public DNS name or IP address of the IKEv2 server.
+  server_id:
+    name: Server identity
+    description: Certificate identity expected from the server, normally its DNS name or IP address.
+  authentication:
+    name: Authentication
+    description: Use certificate for hwdsl2/ipsec-vpn-server; EAP and PSK are for other IKEv2 servers.
+  client_id:
+    name: Client identity
+    description: Certificate client name (for example vpnclient) or local IKE identity.
+  p12_file:
+    name: PKCS#12 file
+    description: File name of the .p12 bundle placed in this app's configuration folder.
+  p12_password:
+    name: PKCS#12 import password
+    description: Import password supplied when the client bundle was generated; leave empty if it has none.
+  username:
+    name: EAP username
+    description: Username used only with EAP-MSCHAPv2.
+  password:
+    name: EAP password
+    description: Password used only with EAP-MSCHAPv2.
+  pre_shared_key:
+    name: IKEv2 pre-shared key
+    description: Secret used only with PSK authentication.
+  server_ca_file:
+    name: Server CA file
+    description: CA certificate file required for EAP server verification.
+  remote_subnets:
+    name: Remote networks
+    description: Comma-separated IPv4 CIDRs routed through the VPN; 0.0.0.0/0 is a full tunnel.
+  ike_proposals:
+    name: Custom IKE proposals
+    description: Optional strongSwan IKE proposal list. Empty uses secure strongSwan defaults.
+  esp_proposals:
+    name: Custom ESP proposals
+    description: Optional strongSwan ESP proposal list. Empty uses secure strongSwan defaults.
+  force_udp_encapsulation:
+    name: Force UDP encapsulation
+    description: Force NAT-T on UDP 4500; useful behind unusual NAT devices.
+  reconnect_interval:
+    name: Reconnect interval
+    description: Seconds between tunnel health checks and reconnection attempts.
+  log_level:
+    name: Log level
+    description: strongSwan diagnostic verbosity shown in the app log.

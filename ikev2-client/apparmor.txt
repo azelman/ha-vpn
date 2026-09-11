@@ -1,0 +1,26 @@
+#include <tunables/global>
+
+profile ikev2_client flags=(attach_disconnected,mediate_deleted) {
+  #include <abstractions/base>
+
+  # strongSwan uses UDP for IKE/NAT-T, a Unix control socket, and NETLINK_XFRM.
+  network inet dgram,
+  network inet6 dgram,
+  network unix stream,
+  network unix dgram,
+  network netlink raw,
+
+  capability net_admin,
+
+  file,
+  signal,
+
+  /run.sh ix,
+  /bin/** ix,
+  /sbin/** ix,
+  /usr/bin/** ix,
+  /usr/sbin/** ix,
+  /usr/lib/bashio/** ix,
+  /usr/lib/ipsec/** mrix,
+  /usr/libexec/ipsec/** mrix,
+}
