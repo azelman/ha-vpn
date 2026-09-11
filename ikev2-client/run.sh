@@ -254,6 +254,10 @@ cat > /etc/strongswan.d/ha-ikev2.conf <<'EOF'
 charon {
   user = root
   group = root
+  # Home Assistant does not expose CAP_NET_BIND_SERVICE to apps. Let the
+  # kernel select unprivileged local ports; the remote IKE ports remain 500/4500.
+  port = 0
+  port_nat_t = 0
 }
 EOF
 chmod 0600 /etc/strongswan.d/ha-ikev2.conf

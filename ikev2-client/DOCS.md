@@ -6,7 +6,10 @@ tunnel. It requires network administration access for Linux XFRM policies and
 uses host networking because a tunnel isolated inside the app would not help
 Home Assistant itself. strongSwan remains root inside the container because
 Home Assistant's app capability model does not expose the ownership and group
-capabilities required by strongSwan's normal privilege transition.
+capabilities required by strongSwan's normal privilege transition. It uses
+kernel assigned local UDP ports because binding local ports 500 and 4500 would
+require an unavailable privileged port capability; the remote VPN ports remain
+the standard 500 and 4500.
 
 ## Before installing: identify the server
 

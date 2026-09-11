@@ -1,9 +1,13 @@
 # Changelog
 
-## 1.0.5
+## 1.0.6
 
 - Configure strongSwan to keep its daemon as root so it can initialize its
   control sockets with Home Assistant's supported capability model.
+- Use kernel assigned local UDP ports because Home Assistant does not expose
+  the privileged port capability required to bind ports 500 and 4500.
+
+## 1.0.5
 
 ## 1.0.4
 
